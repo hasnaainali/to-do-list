@@ -33,6 +33,27 @@ h1 {
   gap: 10px;
   margin-bottom: 20px;
 }
+input[type="date"] {
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  outline: none;
+  font-size: 16px;
+  transition: 0.3s;
+  color: #333;
+}
+
+input[type="date"]:focus {
+  border-color: #00D4E9;
+  background-color: rgba(0, 212, 233, 0.1);
+  color: #00D4E9;
+}
+
+.deadline {
+  font-size: 13px;
+  color: #0008ff;
+  margin-top: 5px;
+}
 
 input[type="text"] {
   flex: 1;
@@ -89,9 +110,17 @@ li {
 
 .task-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 5px;
+  justify-content: flex-end;
 }
+.task-actions button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
 
 .completed {
   text-decoration: line-through;

@@ -11,17 +11,21 @@ function showClock() {
 }
 
 function addTask() {
-  const input = document.getElementById('taskInput');
-  const taskText = input.value.trim();
+  const taskInput = document.getElementById('taskInput');
+  const deadlineInput = document.getElementById('deadlineInput');
+  const taskText = taskInput.value.trim();
+  const deadline = deadlineInput.value;
 
   if (taskText !== '') {
     const task = {
       text: taskText,
       completed: false,
-      timestamp: null
+      timestamp: null,
+      deadline: deadline || null
     };
     saveTask(task);
-    input.value = '';
+    taskInput.value = '';
+    deadlineInput.value = '';
     renderTasks();
   }
 }
@@ -30,10 +34,6 @@ function saveTask(task) {
   let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
   tasks.push(task);
   localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function loadTasks() {
-  renderTasks();
 }
 
 function renderTasks() {
@@ -67,12 +67,10 @@ function renderTasks() {
     const actions = document.createElement('div');
     actions.className = 'task-actions';
 
-    // ✅ Edit button
     const editBtn = document.createElement('button');
     editBtn.textContent = 'Edit';
     editBtn.onclick = () => editTask(index);
 
-    // ✅ Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Delete';
     deleteBtn.onclick = () => deleteTask(index);
@@ -84,17 +82,31 @@ function renderTasks() {
     row.appendChild(actions);
     li.appendChild(row);
 
-    // ✅ Timestamp for completed tasks
+    // ✅ Show deadline
+    if (task.deadline) {
+      const deadline = document.createElement('div');
+      deadline.className = 'deadline';
+      deadline.textContent = `🗓️ Deadline: ${task.deadline}`;
+      li.appendChild(deadline);
+    }
+
+    // ✅ Show timestamp if completed
     if (task.completed && task.timestamp) {
       const timestamp = document.createElement('div');
       timestamp.className = 'timestamp';
-      timestamp.textContent = `Completed at: ${task.timestamp}`;
+      timestamp.textContent = `✅ Completed: ${task.timestamp}`;
       li.appendChild(timestamp);
     }
 
     taskList.appendChild(li);
   });
 }
+
+
+function loadTasks() {
+  renderTasks();
+}
+
 
 function toggleComplete(index) {
   let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -114,11 +126,63 @@ function deleteTask(index) {
 }
 
 function editTask(index) {
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  const newText = prompt("Edit your task:", tasks[index].text);
-  if (newText !== null) {
-    tasks[index].text = newText.trim() || tasks[index].text; 
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    renderTasks();
-  }
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const taskList = document.getElementById('taskList');
+
+  const taskItem = taskList.children[index];
+  const row = taskItem.querySelector('.task-row');
+  const actions = row.querySelector('.task-actions');
+  const left = row.querySelector('div');
+
+  const task = tasks[index];
+
+  // Clear existing row content
+  left.innerHTML = '';
+  actions.innerHTML = '';
+
+  // Create editable input for task text
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = task.text;
+  input.style.flex = '1';
+  input.style.padding = '5px';
+  input.style.borderRadius = '6px';
+
+  // Checkbox
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = task.completed;
+  checkbox.disabled = true;
+
+  // Deadline input
+  const deadlineInput = document.createElement('input');
+  deadlineInput.type = 'date';
+  deadlineInput.value = task.deadline || '';
+  deadlineInput.style.marginLeft = '10px';
+
+  left.appendChild(checkbox);
+  left.appendChild(input);
+  left.appendChild(deadlineInput);
+
+  // Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Save';
+  saveBtn.onclick = () => {
+    const newText = input.value.trim();
+    const newDeadline = deadlineInput.value;
+    if (newText) {
+      tasks[index].text = newText;
+      tasks[index].deadline = newDeadline || null;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+  };
+
+  // Cancel button
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = renderTasks;
+
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
 }
